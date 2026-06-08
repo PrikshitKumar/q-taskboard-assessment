@@ -19,7 +19,9 @@
       "Bash(xargs cat)",
       "Bash(xargs ls)",
       "Bash(curl *)",
-      "Bash(echo \"Server restarting, PID=$!\")"
+      "Bash(echo \"Server restarting, PID=$!\")",
+      "Bash(npm test *)",
+      "Bash(git -C /Users/prikshitkumar/Prikshit/q-taskboard-assessment log --oneline)"
     ]
   }
 }

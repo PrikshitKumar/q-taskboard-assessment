@@ -2,6 +2,19 @@
 
 A Next.js 15 fullstack application for managing projects, tasks, and team members. TypeScript + Prisma + PostgreSQL on the server, React 19 + TanStack Query on the client.
 
+## Submission
+
+| Artifact | Path / Link |
+|----------|-------------|
+| Code Review | [`REVIEW.md`](./REVIEW.md) |
+| Terminal Log | [`TERMINAL_LOG.md`](./TERMINAL_LOG.md) |
+| Testing Guide | [`TESTING.md`](./TESTING.md) |
+| Airtable Export Screenshots | [`screenshots/`](./screenshots/) |
+| Comment Test Script | [`scripts/test-comments.sh`](./scripts/test-comments.sh) |
+| Recording URL | <!-- add URL here --> |
+
+---
+
 ## Quick Setup (Docker — Recommended)
 
 ```bash
@@ -25,19 +38,23 @@ docker-compose exec web npm test
 Requires: Node.js 20+, PostgreSQL 15+
 
 ```bash
-# Run the setup script (installs deps, sets up DB, configures git hooks)
-chmod +x bin/setup
-./bin/setup
-
-# Or do it manually:
 npm install
-git config core.hooksPath .git-hooks
-cp .env.example .env   # then edit DATABASE_URL if your local Postgres differs
+cp .env.example .env   # edit DATABASE_URL if your local Postgres differs
 npx prisma migrate deploy
 npx prisma generate
 npm run db:seed
 npm test
 npm run dev
+```
+
+## Environment Variables
+
+```
+DATABASE_URL=postgresql://<user>@localhost:5432/<db>
+JWT_SECRET=<any-secret-string>
+AIRTABLE_API_KEY=<personal-access-token>   # needs data.records:read + data.records:write
+AIRTABLE_BASE_ID=<appXXXXXXXXXXXXXX>
+AIRTABLE_TABLE_NAME=Tasks
 ```
 
 ## AI Tool Conversation Tracking
@@ -75,8 +92,6 @@ All user passwords are: `password123`
 
 ## Authentication
 
-Register or login to get a JWT token:
-
 ```bash
 # Login
 curl -X POST http://localhost:3000/api/auth/login \
@@ -92,20 +107,27 @@ curl -H "Authorization: Bearer <token>" http://localhost:3000/api/projects
 ### Auth
 - `POST /api/auth/register` — Create account
 - `POST /api/auth/login` — Sign in, get JWT
-- `GET /api/users/me` — Current user (authenticated)
+- `GET /api/users/me` — Current user
 
 ### Projects
-- `GET /api/projects` — List projects you're a member of (authenticated)
-- `POST /api/projects` — Create a project (authenticated; creator becomes admin)
-- `GET /api/projects/:id` — Project detail with tasks and members (authenticated)
-- `PATCH /api/projects/:id` — Update project (authenticated)
-- `DELETE /api/projects/:id` — Delete project (authenticated)
+- `GET /api/projects` — List your projects
+- `POST /api/projects` — Create a project (creator becomes admin)
+- `GET /api/projects/:id` — Project detail with tasks and members
+- `PATCH /api/projects/:id` — Update project (admin only)
+- `DELETE /api/projects/:id` — Delete project (admin only)
 
 ### Tasks
-- `GET /api/projects/:id/tasks` — List tasks in a project (authenticated)
-- `POST /api/projects/:id/tasks` — Create a task (authenticated)
-- `PATCH /api/tasks/:id` — Update a task (authenticated)
-- `DELETE /api/tasks/:id` — Delete a task (authenticated)
+- `GET /api/projects/:id/tasks` — List tasks (supports `?q=` search)
+- `POST /api/projects/:id/tasks` — Create a task (admin/member)
+- `PATCH /api/tasks/:id` — Update a task (admin/member)
+- `DELETE /api/tasks/:id` — Delete a task (admin/member)
+
+### Comments
+- `GET /api/tasks/:id/comments` — List comments chronologically (all members)
+- `POST /api/tasks/:id/comments` — Post a comment (admin/member only; append-only)
+
+### Export
+- `POST /api/projects/:id/export` — Bulk export tasks to Airtable (admin/member only)
 
 ## Tech Stack
 
@@ -117,4 +139,5 @@ curl -H "Authorization: Bearer <token>" http://localhost:3000/api/projects
 - Zod 3 (schema validation)
 - Tailwind CSS 3
 - bcryptjs + jsonwebtoken
+- Airtable 0.12 (export integration)
 - Vitest 2 (testing)

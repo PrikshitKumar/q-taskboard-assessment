@@ -5,7 +5,17 @@
       "Bash(grep -E \"\\(package\\\\.json|tsconfig|\\\\.prisma|\\\\.ts$\\)\")",
       "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"kavya@example.com\",\"password\":\"password123\"}')",
       "Bash(curl -s http://localhost:3000/api/projects -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbXE1a29yZ2swMDAyZ3MzMW1rMDF5MWR3IiwiZW1haWwiOiJrYXZ5YUBleGFtcGxlLmNvbSIsImlhdCI6MTc4MDk0NjExNCwiZXhwIjoxNzgzNTM4MTE0fQ.1mheVuWa_CkVnwIVmF1RJZS2tE1SiXakQRVZfOxjHL8')",
-      "Bash(curl -s http://localhost:3000/api/projects/cmq5korgm0006gs31i9atagk5/tasks?q=launch -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbXE1a29yZ2swMDAyZ3MzMW1rMDF5MWR3IiwiZW1haWwiOiJrYXZ5YUBleGFtcGxlLmNvbSIsImlhdCI6MTc4MDk0NjExNCwiZXhwIjoxNzgzNTM4MTE0fQ.1mheVuWa_CkVnwIVmF1RJZS2tE1SiXakQRVZfOxjHL8')"
+      "Bash(curl -s http://localhost:3000/api/projects/cmq5korgm0006gs31i9atagk5/tasks?q=launch -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbXE1a29yZ2swMDAyZ3MzMW1rMDF5MWR3IiwiZW1haWwiOiJrYXZ5YUBleGFtcGxlLmNvbSIsImlhdCI6MTc4MDk0NjExNCwiZXhwIjoxNzgzNTM4MTE0fQ.1mheVuWa_CkVnwIVmF1RJZS2tE1SiXakQRVZfOxjHL8')",
+      "Bash(npx prisma *)",
+      "Bash(npx tsc *)",
+      "Bash(curl -s http://localhost:3000/api/tasks/cmq5korgw000vgs3175rdi83y/comments -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbXE1a29yZ2swMDAyZ3MzMW1rMDF5MWR3IiwiZW1haWwiOiJrYXZ5YUBleGFtcGxlLmNvbSIsImlhdCI6MTc4MDk0NjcxNiwiZXhwIjoxNzgzNTM4NzE2fQ.6AXaW6cjhtxOBRuVUa9PROPPUdbxT2cclaPm4qtdwys')",
+      "Bash(curl -s -w '\\\\nHTTP %{http_code}' http://localhost:3000/api/tasks/cmq5korgw000vgs3175rdi83y/comments -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbXE1a29yZ2swMDAyZ3MzMW1rMDF5MWR3IiwiZW1haWwiOiJrYXZ5YUBleGFtcGxlLmNvbSIsImlhdCI6MTc4MDk0NjcxNiwiZXhwIjoxNzgzNTM4NzE2fQ.6AXaW6cjhtxOBRuVUa9PROPPUdbxT2cclaPm4qtdwys')",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(npm run *)",
+      "Bash(echo \"Dev server restarting, PID=$!\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/projects -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbXE1a29yZ2swMDAyZ3MzMW1rMDF5MWR3IiwiZW1haWwiOiJrYXZ5YUBleGFtcGxlLmNvbSIsImlhdCI6MTc4MDk0NjcxNiwiZXhwIjoxNzgzNTM4NzE2fQ.6AXaW6cjhtxOBRuVUa9PROPPUdbxT2cclaPm4qtdwys')",
+      "Bash(curl -s -w 'HTTP %{http_code}\\\\n' http://localhost:3000/api/tasks/cmq5korgw000vgs3175rdi83y/comments)",
+      "Bash(curl -s http://localhost:3000/api/tasks/nonexistent-id/comments -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbXE1a29yZ2swMDAyZ3MzMW1rMDF5MWR3IiwiZW1haWwiOiJrYXZ5YUBleGFtcGxlLmNvbSIsImlhdCI6MTc4MDk0NjcxNiwiZXhwIjoxNzgzNTM4NzE2fQ.6AXaW6cjhtxOBRuVUa9PROPPUdbxT2cclaPm4qtdwys')"
     ]
   }
 }

@@ -11,7 +11,7 @@ A Next.js 15 fullstack application for managing projects, tasks, and team member
 | Testing Guide | [`TESTING.md`](./TESTING.md) |
 | Airtable Export Screenshots | [`screenshots/`](./screenshots/) |
 | Comment Test Script | [`scripts/test-comments.sh`](./scripts/test-comments.sh) |
-| Recording URL | <!-- add URL here --> |
+| Recording URL | https://drive.google.com/file/d/1l7pspD_fDTVbHguuYN9oj4_JrgwfaPoL/view?usp=sharing |
 
 ---
 

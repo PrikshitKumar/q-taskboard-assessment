@@ -39,6 +39,14 @@ export type ApiProjectDetail = {
   updatedAt: string;
 };
 
+export type ExportSummary = {
+  exported: number;
+  created: number;
+  updated: number;
+  failed: number;
+  failures: Array<{ taskId: string; title: string; error: string }>;
+};
+
 export const STATUS_LABELS: Record<TaskStatus, string> = {
   todo: "To do",
   in_progress: "In progress",

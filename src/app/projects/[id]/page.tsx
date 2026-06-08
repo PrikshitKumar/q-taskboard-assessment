@@ -4,11 +4,11 @@ import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, getToken } from "@/lib/api-client";
+import { apiFetch, getToken, getStoredUser } from "@/lib/api-client";
 import { Header } from "@/components/Header";
 import { StatusColumn } from "@/components/StatusColumn";
 import { TaskDetail } from "@/components/TaskDetail";
-import type { ApiProjectDetail, ApiTask, TaskStatus } from "@/types";
+import type { ApiProjectDetail, ApiTask, ExportSummary, TaskStatus } from "@/types";
 import { STATUS_ORDER } from "@/types";
 
 type PageProps = { params: Promise<{ id: string }> };
@@ -22,6 +22,7 @@ export default function ProjectPage({ params }: PageProps) {
   const [newTitle, setNewTitle] = useState("");
   const [newColumn, setNewColumn] = useState<TaskStatus>("todo");
   const [error, setError] = useState<string | null>(null);
+  const [exportResult, setExportResult] = useState<ExportSummary | null>(null);
 
   useEffect(() => {
     if (!getToken()) router.replace("/login");
@@ -30,6 +31,13 @@ export default function ProjectPage({ params }: PageProps) {
   const { data, isLoading, error: queryError } = useQuery({
     queryKey: ["project", id],
     queryFn: () => apiFetch<{ project: ApiProjectDetail }>(`/api/projects/${id}`),
+  });
+
+  const exportToAirtable = useMutation({
+    mutationFn: () =>
+      apiFetch<ExportSummary>(`/api/projects/${id}/export`, { method: "POST" }),
+    onSuccess: (result) => setExportResult(result),
+    onError: (err) => setError(err instanceof Error ? err.message : "export failed"),
   });
 
   const createTask = useMutation({
@@ -46,6 +54,10 @@ export default function ProjectPage({ params }: PageProps) {
   });
 
   const project = data?.project;
+  const currentUser = getStoredUser();
+  const myMembership = project?.memberships.find((m) => m.user.id === currentUser?.id);
+  const canExport = myMembership?.role === "admin" || myMembership?.role === "member";
+
   const tasksByStatus: Record<TaskStatus, ApiTask[]> = {
     todo: [],
     in_progress: [],
@@ -91,6 +103,29 @@ export default function ProjectPage({ params }: PageProps) {
                   owner: {project.owner.name} · {project.memberships.length} members
                 </p>
               </div>
+
+              {canExport && (
+                <div className="flex flex-col items-end gap-2">
+                  <button
+                    onClick={() => { setExportResult(null); setError(null); exportToAirtable.mutate(); }}
+                    disabled={exportToAirtable.isPending}
+                    className="bg-surface border border-border hover:border-accent text-sm font-medium rounded-md px-4 py-2 disabled:opacity-50 transition-colors"
+                  >
+                    {exportToAirtable.isPending ? "exporting…" : "export to Airtable"}
+                  </button>
+                  {exportResult && (
+                    <p className="text-xs text-green-400">
+                      ✓ {exportResult.exported} exported
+                      {exportResult.created > 0 && ` (${exportResult.created} new`}
+                      {exportResult.updated > 0 && `, ${exportResult.updated} updated`}
+                      {exportResult.created > 0 && ")"}
+                      {exportResult.failed > 0 && (
+                        <span className="text-yellow-400"> · {exportResult.failed} failed</span>
+                      )}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             <section className="bg-surface border border-border rounded-lg p-4 mb-6">
